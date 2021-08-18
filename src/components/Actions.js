@@ -11,11 +11,10 @@ export default function Actions({contract, provider, signer}) {
       return
     }
 
-    console.log(signer, contract, provider)
     setLoading(true)
-    console.log(signer.address)
     const tx = await contract.connect(signer).aDayInTheLife(name)
-    await tx.wait()
+    const rec = await tx.wait()
+    console.log('Receipt: ', rec)
 
     setName("")
     setLoading(false)

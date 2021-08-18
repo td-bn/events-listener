@@ -1,17 +1,18 @@
 import { ethers } from "ethers";
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 import * as Activites from "../artifacts/contracts/Events.sol/Activities.json"
-const address = "0x0CB2518347CE99431902448BDaeE9eC4241D80b3";
+const address = "0x8c071289ED88f4d4668c420E77c47BA76619e732";
 const abi = Activites.abi
 
-let signer, provider, contract
+let provider, contract
 
 const initialize = () => {
   if (window.ethereum) {
       try {
-          provider = new ethers.providers.Web3Provider(window.ethereum)
-          signer = provider.getSigner();
+          window.ethereum.enable().then(
+            provider = new ethers.providers.Web3Provider(window.ethereum)
+          )
           contract = new ethers.Contract(address, abi, provider)
       } catch (error) {
           window.alert("Permission denied")
@@ -41,32 +42,28 @@ export default function Events() {
   const [basketballers, setBasketballers] = useState(new Set())
   const [footballers, setFootballers] = useState(new Set())
 
+  provider.on('Block', () => {
+    contract.removeAllListeners()
+    contract.once("Brush", (name, time, event) => {
+      const s = new Set(wakey)
+      s.add(name+time.toString())
+      setWakey(s)
+    })
+    
+    const bfilter = contract.filters.Play(null, null, "Basketball")
+    contract.once(bfilter, (name, time, sport, event) => {
+      const s = new Set(basketballers)
+      s.add(name)
+      setBasketballers(s)
+    })
 
-  contract.removeAllListeners()
-  contract.on("Brush", (name, time, event) => {
-    const s = new Set(wakey)
-    s.add(name+time.toString())
-    if (s.size === wakey.size) return
-    setWakey(s)
+    const ffilter = contract.filters.Play(null, null, "Football")
+    contract.once(ffilter, (name, time, sport, event) => {
+      const s = new Set(footballers)
+      s.add(name)
+      setFootballers(s)
+    })
   })
-  
-  const bfilter = contract.filters.Play(null, null, "Basketball")
-  contract.on(bfilter, (name, time, sport, event) => {
-    const s = new Set(basketballers)
-    s.add(name)
-    if (s.size === basketballers.size) return
-    setBasketballers(s)
-  })
-
-  const ffilter = contract.filters.Play(null, null, "Football")
-  contract.on(ffilter, (name, time, sport, event) => {
-    const s = new Set(footballers)
-    s.add(name)
-    if (s.size === footballers.size) return
-    setFootballers(s)
-  })
-
-  console.log(`#Listeners: ${contract.listenerCount()}`)
 
   return (
     <div className="row events-list">

@@ -5,7 +5,7 @@ import Actions from './components/Actions'
 import Events from './components/Events'
 import './App.css'
 
-const contractAddress =  "0x84058d8368f75CE10C75c1f776065c79f029c9D2"
+const contractAddress =  "0xbf7fB9A78e05Bbce4fD0401a51458348FdD9afC4"
 const abi = Person.abi
 
 let signer, provider, contract
@@ -13,7 +13,9 @@ let signer, provider, contract
 const initialize = () => {
   if (window.ethereum) {
       try {
-          provider = new ethers.providers.Web3Provider(window.ethereum)
+          window.ethereum.enable().then(
+            provider = new ethers.providers.Web3Provider(window.ethereum)
+          )
           signer = provider.getSigner();
           contract = new ethers.Contract(contractAddress, abi, provider)
       } catch (error) {
